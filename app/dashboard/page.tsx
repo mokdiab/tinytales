@@ -6,6 +6,7 @@ import { useAuthStore } from '@/lib/store/authStore';
 import { authApi } from '@/lib/api/auth';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/localUi/Button';
+import Image from 'next/image';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function DashboardPage() {
       logout();
       toast.success('Logged out successfully');
       router.push('/login');
-    } catch (error) {
+    } catch {
       toast.error('Failed to logout');
     }
   };
@@ -57,10 +58,11 @@ export default function DashboardPage() {
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="flex items-center space-x-4 mb-6">
             <div className="w-20 h-20 rounded-full overflow-hidden bg-blue-100">
-              <img
+              <Image
                 src={user.image}
                 alt={user.name}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             </div>
             <div>

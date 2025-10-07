@@ -23,14 +23,17 @@ export function formatPhoneNumber(phone: string): string {
   return phone.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
 }
 
-export function getErrorMessage(error: any): string {
-  if (error?.message) {
-    return error.message;
+export function getErrorMessage(error: unknown): string {
+  if (error && typeof error === 'object' && 'message' in error) {
+    return (error as { message: string }).message;
   }
-  if (error?.errors && typeof error.errors === 'object') {
-    const firstError = Object.values(error.errors)[0];
-    if (Array.isArray(firstError) && firstError.length > 0) {
-      return firstError[0];
+  if (error && typeof error === 'object' && 'errors' in error) {
+    const errorObj = error as { errors: Record<string, unknown> };
+    if (typeof errorObj.errors === 'object') {
+      const firstError = Object.values(errorObj.errors)[0];
+      if (Array.isArray(firstError) && firstError.length > 0) {
+        return firstError[0] as string;
+      }
     }
   }
   return 'An unexpected error occurred';

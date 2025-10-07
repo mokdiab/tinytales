@@ -42,16 +42,16 @@ export const LoginForm = () => {
           router.push('/dashboard');
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorMessage = getErrorMessage(error);
       toast.error(errorMessage);
       
-      if (error?.errors) {
-        Object.entries(error.errors).forEach(([field, messages]) => {
+      if (error && typeof error === 'object' && 'errors' in error && error.errors) {
+        Object.entries(error.errors as Record<string, unknown>).forEach(([field, messages]) => {
           if (Array.isArray(messages) && messages.length > 0) {
             setError(field as keyof LoginFormData, {
               type: 'manual',
-              message: messages[0],
+              message: messages[0] as string,
             });
           }
         });
@@ -118,7 +118,7 @@ export const LoginForm = () => {
         </Button>
 
         <p className="text-center text-sm text-gray-600">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/register" className="text-blue-600 hover:text-blue-700 font-medium">
             Sign up
           </Link>

@@ -37,16 +37,16 @@ export const VerifyForm = () => {
         toast.success(response.message || 'Email verified successfully!');
         router.push('/dashboard');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorMessage = getErrorMessage(error);
       toast.error(errorMessage);
       
-      if (error?.errors) {
-        Object.entries(error.errors).forEach(([field, messages]) => {
+      if (error && typeof error === 'object' && 'errors' in error && error.errors) {
+        Object.entries(error.errors as Record<string, unknown>).forEach(([field, messages]) => {
           if (Array.isArray(messages) && messages.length > 0) {
             setError(field as keyof VerifyFormData, {
               type: 'manual',
-              message: messages[0],
+              message: messages[0] as string,
             });
           }
         });
@@ -63,7 +63,7 @@ export const VerifyForm = () => {
       if (response.status) {
         toast.success(response.message || 'Verification code sent!');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorMessage = getErrorMessage(error);
       toast.error(errorMessage);
     } finally {
@@ -81,7 +81,7 @@ export const VerifyForm = () => {
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Verify Your Email</h1>
         <p className="text-gray-600">
-          We've sent a verification code to
+          We&apos;ve sent a verification code to
           <br />
           <span className="font-medium text-gray-900">{user?.email}</span>
         </p>
@@ -117,7 +117,7 @@ export const VerifyForm = () => {
 
         <div className="text-center">
           <p className="text-sm text-gray-600 mb-2">
-            Didn't receive the code?
+            Didn&apos;t receive the code?
           </p>
           <Button
             type="button"

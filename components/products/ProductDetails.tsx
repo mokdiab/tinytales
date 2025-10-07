@@ -1,7 +1,7 @@
 'use client'
 import { useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, ShoppingBag, Heart } from "lucide-react";
+import { ChevronRight, ShoppingBag, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
