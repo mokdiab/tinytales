@@ -56,22 +56,7 @@ export default function DashboardPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white rounded-xl shadow-lg p-8">
-          <div className="flex items-center space-x-4 mb-6">
-            <div className="w-20 h-20 rounded-full overflow-hidden bg-blue-100">
-              <Image
-                src={user.image}
-                alt={user.name}
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900">
-                Welcome, {user.name}!
-              </h2>
-              <p className="text-gray-600 mt-1">{user.email}</p>
-            </div>
-          </div>
+
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
             <div className="bg-blue-50 p-6 rounded-lg">
@@ -103,6 +88,30 @@ export default function DashboardPage() {
             <div className="bg-orange-50 p-6 rounded-lg">
               <h3 className="font-semibold text-gray-900 mb-2">Account ID</h3>
               <p className="text-gray-700">#{user.id}</p>
+            </div>
+          </div>
+
+          <div className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg">
+            <h3 className="font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <div className="flex flex-wrap gap-4">
+              <Button 
+                onClick={() => router.push('/products')} 
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Browse Products
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => router.push('/profile')}
+              >
+                Edit Profile
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => router.push('/settings')}
+              >
+                Settings
+              </Button>
             </div>
           </div>
 

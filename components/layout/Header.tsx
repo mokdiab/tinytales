@@ -33,6 +33,10 @@ import {
   import { TbShoppingBag } from "react-icons/tb";
 import NavItem from "./NavItem";
 import { useState } from "react";
+import { useAuthStore } from "@/lib/store/authStore";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { authApi } from "@/lib/api/auth";
 
 const cartItems = [
     { id: 1, name: "Wireless Headphones", price: 99.99, quantity: 1, image: "/headphones.jpg" },
@@ -63,6 +67,8 @@ export default function Header() {
     const [notifs, setNotifs] = useState(notifications);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [selectedLanguage, setSelectedLanguage] = useState("EN");
+    const { user, logout } = useAuthStore();
+    const router = useRouter();
   
     const cartTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
     const unreadNotifs = notifs.filter(notif => !notif.read).length;
@@ -85,6 +91,17 @@ export default function Header() {
   
     const markAllAsRead = () => {
       setNotifs(notifs.map(notif => ({ ...notif, read: true })));
+    };
+
+    const handleLogout = async () => {
+      try {
+        await authApi.logout();
+        logout();
+        toast.success('Logged out successfully');
+        router.push('/login');
+      } catch {
+        toast.error('Failed to logout');
+      }
     };
 
     const navItems = [
@@ -110,7 +127,6 @@ export default function Header() {
                         </div>
                     </div>
 
-                    {/* Desktop Icons */}
                     <div className="hidden lg:flex items-center gap-1">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -336,33 +352,66 @@ export default function Header() {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <div className="cursor-pointer p-2 rounded-full hover:bg-gray-100 flex items-center gap-1">
-                                    <FaRegUser className="w-5 h-5 text-gray-700" />
+                                    {user ? (
+                                        <Avatar className="h-8 w-8">
+                                            <AvatarImage 
+                                                src={user.image} 
+                                                alt={user.name}
+                                                onError={(e) => {
+                                                    const target = e.target as HTMLImageElement;
+                                                    target.style.display = 'none';
+                                                    const fallback = target.nextElementSibling as HTMLElement;
+                                                    if (fallback) fallback.style.display = 'flex';
+                                                }}
+                                            />
+                                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+                                                {user.name.charAt(0).toUpperCase()}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                    ) : (
+                                        <FaRegUser className="w-5 h-5 text-gray-700" />
+                                    )}
                                     <MdKeyboardArrowDown className="w-4 h-4 text-gray-700" />
                                 </div>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56">
-                                <DropdownMenuLabel className="font-normal">
-                                    <div className="flex flex-col space-y-1">
-                                        <p className="text-sm font-medium leading-none">John Doe</p>
-                                        <p className="text-xs leading-none text-muted-foreground">
-                                            john.doe@example.com
-                                        </p>
-                                    </div>
-                                </DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="cursor-pointer">
-                                    <FaUser className="mr-2 h-4 w-4" />
-                                    <span>Profile</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="cursor-pointer">
-                                    <FaCog className="mr-2 h-4 w-4" />
-                                    <span>Settings</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="cursor-pointer text-destructive">
-                                    <FaSignOutAlt className="mr-2 h-4 w-4" />
-                                    <span>Log out</span>
-                                </DropdownMenuItem>
+                                {user ? (
+                                    <>
+                                        <DropdownMenuLabel className="font-normal">
+                                            <div className="flex flex-col space-y-1">
+                                                <p className="text-sm font-medium leading-none">{user.name}</p>
+                                                <p className="text-xs leading-none text-muted-foreground">
+                                                    {user.email}
+                                                </p>
+                                            </div>
+                                        </DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem className="cursor-pointer" onClick={() => router.push('/dashboard')}>
+                                            <FaUser className="mr-2 h-4 w-4" />
+                                            <span>Profile</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem className="cursor-pointer">
+                                            <FaCog className="mr-2 h-4 w-4" />
+                                            <span>Settings</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem className="cursor-pointer text-destructive" onClick={handleLogout}>
+                                            <FaSignOutAlt className="mr-2 h-4 w-4" />
+                                            <span>Log out</span>
+                                        </DropdownMenuItem>
+                                    </>
+                                ) : (
+                                    <>
+                                        <DropdownMenuItem className="cursor-pointer" onClick={() => router.push('/login')}>
+                                            <FaRegUser className="mr-2 h-4 w-4" />
+                                            <span>Login</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem className="cursor-pointer" onClick={() => router.push('/register')}>
+                                            <FaUser className="mr-2 h-4 w-4" />
+                                            <span>Register</span>
+                                        </DropdownMenuItem>
+                                    </>
+                                )}
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
@@ -383,17 +432,31 @@ export default function Header() {
             {isMobileMenuOpen && (
                 <div className="lg:hidden absolute top-[90px] left-0 right-0 bg-white shadow-lg border-t z-40 max-h-[calc(100vh-90px)] overflow-y-auto">
                     <div className="container mx-auto px-4 py-4">
-                        <div className="pb-4 mb-4 border-b">
-                            <div className="flex items-center gap-3">
-                                <Avatar className="h-12 w-12">
-                                    <AvatarFallback>JD</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <p className="font-medium">John Doe</p>
-                                    <p className="text-sm text-muted-foreground">john.doe@example.com</p>
+                        {user && (
+                            <div className="pb-4 mb-4 border-b">
+                                <div className="flex items-center gap-3">
+                                    <Avatar className="h-12 w-12">
+                                        <AvatarImage 
+                                            src={user.image} 
+                                            alt={user.name}
+                                            onError={(e) => {
+                                                const target = e.target as HTMLImageElement;
+                                                target.style.display = 'none';
+                                                const fallback = target.nextElementSibling as HTMLElement;
+                                                if (fallback) fallback.style.display = 'flex';
+                                            }}
+                                        />
+                                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-lg">
+                                            {user.name.charAt(0).toUpperCase()}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="font-medium">{user.name}</p>
+                                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
 
                         <nav className="flex flex-col gap-2 mb-4 pb-4 border-b">
                             {navItems.map((item) => (
@@ -567,18 +630,33 @@ export default function Header() {
                         </div>
 
                         <div className="space-y-2">
-                            <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
-                                <FaUser className="w-5 h-5 text-gray-700" />
-                                <span className="text-gray-700">Profile</span>
-                            </button>
-                            <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
-                                <FaCog className="w-5 h-5 text-gray-700" />
-                                <span className="text-gray-700">Settings</span>
-                            </button>
-                            <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors text-destructive">
-                                <FaSignOutAlt className="w-5 h-5" />
-                                <span>Log out</span>
-                            </button>
+                            {user ? (
+                                <>
+                                    <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors" onClick={() => router.push('/dashboard')}>
+                                        <FaUser className="w-5 h-5 text-gray-700" />
+                                        <span className="text-gray-700">Profile</span>
+                                    </button>
+                                    <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
+                                        <FaCog className="w-5 h-5 text-gray-700" />
+                                        <span className="text-gray-700">Settings</span>
+                                    </button>
+                                    <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors text-destructive" onClick={handleLogout}>
+                                        <FaSignOutAlt className="w-5 h-5" />
+                                        <span>Log out</span>
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors" onClick={() => router.push('/login')}>
+                                        <FaRegUser className="w-5 h-5 text-gray-700" />
+                                        <span className="text-gray-700">Login</span>
+                                    </button>
+                                    <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors" onClick={() => router.push('/register')}>
+                                        <FaUser className="w-5 h-5 text-gray-700" />
+                                        <span className="text-gray-700">Register</span>
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>

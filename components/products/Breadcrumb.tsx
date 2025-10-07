@@ -16,7 +16,6 @@ interface BreadcrumbItemType {
     href?: string;
 }
 
-// Map routes to readable labels
 const routeLabels: Record<string, string> = {
     "": "Home",
     "category": "Our Category",

@@ -10,12 +10,10 @@ export function middleware(request: NextRequest) {
   const protectedRoutes = ['/dashboard', '/profile', '/settings', '/verify-email'];
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
   
-  // Redirect authenticated users away from public routes
   if (token && isPublicRoute) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
   
-  // Redirect unauthenticated users away from protected routes
   if (!token && isProtectedRoute) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
